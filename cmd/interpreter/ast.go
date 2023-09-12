@@ -49,6 +49,15 @@ type Str struct {
 	Value    string   `json:"value"`
 	Location Location `json:"location"`
 }
+
+func NewStr(kind string, value string, loc Location) Str {
+	return Str{
+		Kind:     kind,
+		Value:    value,
+		Location: loc,
+	}
+}
+
 type Int struct {
 	Kind     string   `json:"kind"`
 	Value    float64  `json:"value"`
@@ -155,6 +164,14 @@ type Print struct {
 	Kind     string   `json:"kind"`
 	Value    Term     `json:"value"`
 	Location Location `json:"location"`
+}
+
+func NewPrint(kind string, value Term, loc Location) Print {
+	return Print{
+		Kind:     kind,
+		Value:    value,
+		Location: loc,
+	}
 }
 
 type Term interface{}

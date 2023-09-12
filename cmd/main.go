@@ -15,12 +15,11 @@ func main() {
 		return
 	}
 
-	// Decodificar o JSON para a estrutura File
 	var file interpreter.File
 	if err := json.Unmarshal(data, &file); err != nil {
 		fmt.Println("Erro ao decodificar o JSON:", err)
 		return
 	}
-
-	fmt.Printf("%v", file)
+	interpreter.Eval(file.Expression)
+	// fmt.Printf("%v", file)
 }
