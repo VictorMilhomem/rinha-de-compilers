@@ -1,101 +1,160 @@
 package interpreter
 
 type File struct {
-	name       string   `json:"name"`
-	expression Term     `json:"expression"`
-	location   Location `json:"location"`
+	Name       string   `json:"name"`
+	Expression Term     `json:"expression"`
+	Location   Location `json:"location"`
 }
 
 type Location struct {
-	start    int    `json:"start"`
-	end      int    `json:"end"`
-	filename string `json:"filename"`
+	Start    int    `json:"start"`
+	End      int    `json:"end"`
+	Filename string `json:"filename"`
 }
 
 type Parameter struct {
-	text     string   `json:"text"`
-	location Location `json:"location"`
+	Text     string   `json:"text"`
+	Location Location `json:"location"`
 }
 
 type Var struct {
-	kind     string   `json:"kind"`
-	text     string   `json:"text"`
-	location Location `json:"location"`
+	Kind     string   `json:"kind"`
+	Text     string   `json:"text"`
+	Location Location `json:"location"`
 }
 
 type Function struct {
-	kind       string      `json:"kind"`
-	parameters []Parameter `json:"parameters"`
-	value      Term        `json:"value"`
-	location   Location    `json:"location"`
+	Kind       string      `json:"kind"`
+	Parameters []Parameter `json:"parameters"`
+	Value      Term        `json:"value"`
+	Location   Location    `json:"location"`
 }
 
 type Call struct {
-	kind      string   `json:"kind"`
-	callee    Term     `json:"callee"`
-	arguments Term     `json:"arguments"`
-	location  Location `json:"location"`
+	Kind      string   `json:"kind"`
+	Callee    Term     `json:"callee"`
+	Arguments Term     `json:"arguments"`
+	Location  Location `json:"location"`
 }
 type Let struct {
-	kind     string    `json:"kind"`
-	name     Parameter `json:"parameter"`
-	value    Term      `json:"value"`
-	next     Term      `json:"next"`
-	location Location  `json:"location"`
+	Kind     string    `json:"kind"`
+	Name     Parameter `json:"parameter"`
+	Value    Term      `json:"value"`
+	Next     Term      `json:"next"`
+	Location Location  `json:"location"`
 }
 
 type Str struct {
-	kind     string   `json:"kind"`
-	value    string   `json:"value"`
-	location Location `json:"location"`
+	Kind     string   `json:"kind"`
+	Value    string   `json:"value"`
+	Location Location `json:"location"`
 }
 type Int struct {
-	kind     string   `json:"kind"`
-	value    float64  `json:"value"`
-	location Location `json:"location"`
+	Kind     string   `json:"kind"`
+	Value    float64  `json:"value"`
+	Location Location `json:"location"`
 }
-type BinaryOp struct{}
+
+type OpType int
+
+const (
+	Add OpType = iota
+	Sub
+	Mul
+	Div
+	Rem
+	Eq
+	Neq
+	Lt
+	Gt
+	Lte
+	Gte
+	And
+	Or
+)
+
+type Op struct {
+	Name string
+	Op   OpType
+}
+
+type BinaryOp struct {
+	Op string
+}
+
+func NewBinaryOp(optype Op) BinaryOp {
+	switch optype.Op {
+	case Add:
+		return BinaryOp{Op: "Add"}
+	case Sub:
+		return BinaryOp{Op: "Sub"}
+	case Mul:
+		return BinaryOp{Op: "Mul"}
+	case Div:
+		return BinaryOp{Op: "Div"}
+	case Rem:
+		return BinaryOp{Op: "Rem"}
+	case Eq:
+		return BinaryOp{Op: "Eq"}
+	case Neq:
+		return BinaryOp{Op: "Neq"}
+	case Lt:
+		return BinaryOp{Op: "Lt"}
+	case Gt:
+		return BinaryOp{Op: "Gt"}
+	case Lte:
+		return BinaryOp{Op: "Lte"}
+	case Gte:
+		return BinaryOp{Op: "Gte"}
+	case And:
+		return BinaryOp{Op: "And"}
+	case Or:
+		return BinaryOp{Op: "Or"}
+	default:
+		return BinaryOp{Op: "Unknow binary op"}
+	}
+}
 
 type Bool struct {
-	kind     string   `json:"kind"`
-	value    bool     `json:"value"`
-	location Location `json:"location"`
+	Kind     string   `json:"kind"`
+	Value    bool     `json:"value"`
+	Location Location `json:"location"`
 }
 type If struct {
-	kind      string   `json:"kind"`
-	condition Term     `json:"condition"`
-	then      Term     `json:"then"`
-	otherwise Term     `json:"otherwise"`
-	location  Location `json:"location"`
+	Kind      string   `json:"kind"`
+	Condition Term     `json:"condition"`
+	Then      Term     `json:"then"`
+	Otherwise Term     `json:"otherwise"`
+	Location  Location `json:"location"`
 }
 
 type Binary struct {
-	kind     string   `json:"kind"`
-	lhs      Term     `json:"lhs"`
-	op       BinaryOp `json:"op"`
-	rhs      Term     `json:"rhs"`
-	location Location `json:"location"`
+	Kind     string   `json:"kind"`
+	Lhs      Term     `json:"lhs"`
+	Op       BinaryOp `json:"op"`
+	Rhs      Term     `json:"rhs"`
+	Location Location `json:"location"`
 }
 type Tuple struct {
-	kind     string   `json:"kind"`
-	first    Term     `json:"first"`
-	second   Term     `json:"second"`
-	location Location `json:"location"`
+	Kind     string   `json:"kind"`
+	First    Term     `json:"first"`
+	Second   Term     `json:"second"`
+	Location Location `json:"location"`
 }
 type First struct {
-	kind     string   `json:"kind"`
-	value    bool     `json:"value"`
-	location Location `json:"location"`
+	Kind     string   `json:"kind"`
+	Value    bool     `json:"value"`
+	Location Location `json:"location"`
 }
 type Second struct {
-	kind     string   `json:"kind"`
-	value    bool     `json:"value"`
-	location Location `json:"location"`
+	Kind     string   `json:"kind"`
+	Value    bool     `json:"value"`
+	Location Location `json:"location"`
 }
 type Print struct {
-	kind     string   `json:"kind"`
-	value    bool     `json:"value"`
-	location Location `json:"location"`
+	Kind     string   `json:"kind"`
+	Value    Term     `json:"value"`
+	Location Location `json:"location"`
 }
 
 type Term interface{}
