@@ -50,9 +50,9 @@ type Str struct {
 	Location Location `json:"location"`
 }
 
-func NewStr(kind string, value string, loc Location) Str {
+func NewStr(value string, loc Location) Str {
 	return Str{
-		Kind:     kind,
+		Kind:     "Print",
 		Value:    value,
 		Location: loc,
 	}
@@ -62,6 +62,14 @@ type Int struct {
 	Kind     string   `json:"kind"`
 	Value    float64  `json:"value"`
 	Location Location `json:"location"`
+}
+
+func NewInt(value float64, loc Location) Int {
+	return Int{
+		Kind:     "Int",
+		Value:    value,
+		Location: loc,
+	}
 }
 
 type OpType int
@@ -129,6 +137,15 @@ type Bool struct {
 	Value    bool     `json:"value"`
 	Location Location `json:"location"`
 }
+
+func NewBool(value bool, loc Location) Bool {
+	return Bool{
+		Kind:     "Bool",
+		Value:    value,
+		Location: loc,
+	}
+}
+
 type If struct {
 	Kind      string   `json:"kind"`
 	Condition Term     `json:"condition"`
