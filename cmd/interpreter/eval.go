@@ -7,6 +7,8 @@ import (
 
 func Eval(node Expression) interface{} {
 	switch node.Kind {
+	case "If":
+		return evalueteIf(node.Value.(map[string]interface{}))
 	case "Int":
 		return node.Value.(float64)
 	case "Str":
@@ -18,15 +20,49 @@ func Eval(node Expression) interface{} {
 	case "Print":
 		kind := node.Value.(map[string]interface{})["kind"]
 		var printValue interface{}
-		if kind == "Binary" {
+		switch kind {
+		case "Binary":
 			printValue = evaluateBinary(node.Value.(map[string]interface{}))
-		} else {
+		case "If":
+			printValue = evalueteIf(node.Value.(map[string]interface{}))
+		default:
 			printValue = node.Value.(map[string]interface{})["value"]
 		}
+
 		fmt.Printf("%v", printValue)
 		return nil
 	default:
 		panic("Unsupported expression kind: " + node.Kind)
+	}
+}
+
+func evalueteIf(ifNode map[string]interface{}) interface{} {
+	condition, conditionExists := ifNode["condition"]
+	then, theExistis := ifNode["then"]
+	otherwise, otherwiseExists := ifNode["otherwise"]
+
+	if !conditionExists || !theExistis || !otherwiseExists {
+		panic("Invalid if expression structure")
+	}
+	switch val := Eval(Expression{
+		Kind:     condition.(map[string]interface{})["kind"].(string),
+		Value:    condition.(map[string]interface{})["value"],
+		Location: parseLocation(condition.(map[string]interface{})["location"].(map[string]interface{})),
+	}); val {
+	case true:
+		return Eval(Expression{
+			Kind:     then.(map[string]interface{})["kind"].(string),
+			Value:    then.(map[string]interface{})["value"],
+			Location: parseLocation(then.(map[string]interface{})["location"].(map[string]interface{})),
+		})
+	case false:
+		return Eval(Expression{
+			Kind:     otherwise.(map[string]interface{})["kind"].(string),
+			Value:    otherwise.(map[string]interface{})["value"],
+			Location: parseLocation(otherwise.(map[string]interface{})["location"].(map[string]interface{})),
+		})
+	default:
+		panic("Error in if expression")
 	}
 }
 

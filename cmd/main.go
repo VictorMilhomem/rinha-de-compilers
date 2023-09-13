@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	data, err := ioutil.ReadFile("examples\\sumNumStr.json")
+	data, err := ioutil.ReadFile("examples\\if.json")
 	if err != nil {
 		fmt.Println("Erro ao ler o arquivo:", err)
 		return
