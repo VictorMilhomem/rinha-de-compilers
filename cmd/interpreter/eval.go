@@ -11,6 +11,8 @@ func Eval(node Expression) interface{} {
 		return node.Value.(float64)
 	case "Str":
 		return node.Value.(string)
+	case "Bool":
+		return node.Value.(bool)
 	case "Binary":
 		return evaluateBinary(node.Value.(map[string]interface{}))
 	case "Print":
@@ -66,8 +68,35 @@ func evaluateBinary(binaryNode map[string]interface{}) interface{} {
 	// Equality on string operations
 	switch operator {
 	case "Add":
-		// TODO: Sum number and string
-		return lhs.(float64) + rhs.(float64)
+		switch lhs.(type) {
+		case string:
+			lnode, _ := lhs.(string)
+			switch rhs.(type) {
+			case string:
+				rnode, _ := rhs.(string)
+				return lnode + rnode
+			case float64:
+				rnode := fmt.Sprintf("%v", rhs.(float64))
+				return lnode + rnode
+			default:
+				panic("Error: could not add")
+			}
+		case float64:
+			lnode, _ := lhs.(float64)
+			switch rhs.(type) {
+			case string:
+				lnode := fmt.Sprintf("%v", lhs.(float64))
+				rnode, _ := rhs.(string)
+				return lnode + rnode
+			case float64:
+				rnode := rhs.(float64)
+				return lnode + rnode
+			default:
+				panic("Error: could not add")
+			}
+		default:
+			panic("Error: could not add")
+		}
 	case "Sub":
 		return lhs.(float64) - rhs.(float64)
 	case "Mul":
@@ -77,42 +106,48 @@ func evaluateBinary(binaryNode map[string]interface{}) interface{} {
 	case "Rem":
 		return lhs.(float64) / rhs.(float64)
 	case "Eq":
-		lnode, okl := lhs.(string)
-		rnode, okr := rhs.(string)
-		if okl && okr {
-			return strings.Compare(lnode, rnode)
-		}
-
-		l, okl := lhs.(float64)
-		r, okr := rhs.(float64)
-		if okl && okr {
-			return l == r
-		}
-
-		lb, okl := lhs.(bool)
-		rb, okr := rhs.(bool)
-		if okl && okr {
-			return lb == rb
+		switch lhs.(type) {
+		case string:
+			lnode, _ := lhs.(string)
+			rnode, okr := rhs.(string)
+			if okr {
+				return strings.Compare(lnode, rnode)
+			}
+		case float64:
+			lnode, _ := lhs.(float64)
+			rnode, okr := rhs.(float64)
+			if okr {
+				return lnode == rnode
+			}
+		case bool:
+			lnode, _ := lhs.(bool)
+			rnode, okr := rhs.(bool)
+			if okr {
+				return lnode == rnode
+			}
 		}
 		// TODO: Create Error Type
 		panic("Unsupported binary operation: " + operator)
 	case "Neq":
-		lnode, okl := lhs.(string)
-		rnode, okr := rhs.(string)
-		if okl && okr {
-			return strings.Compare(lnode, rnode)
-		}
-
-		l, okl := lhs.(float64)
-		r, okr := rhs.(float64)
-		if okl && okr {
-			return l != r
-		}
-
-		lb, okl := lhs.(bool)
-		rb, okr := rhs.(bool)
-		if okl && okr {
-			return lb != rb
+		switch lhs.(type) {
+		case string:
+			lnode, _ := lhs.(string)
+			rnode, okr := rhs.(string)
+			if okr {
+				return strings.Compare(lnode, rnode)
+			}
+		case float64:
+			lnode, _ := lhs.(float64)
+			rnode, okr := rhs.(float64)
+			if okr {
+				return lnode != rnode
+			}
+		case bool:
+			lnode, _ := lhs.(bool)
+			rnode, okr := rhs.(bool)
+			if okr {
+				return lnode != rnode
+			}
 		}
 		// TODO: Create Error Type
 		panic("Unsupported binary operation: " + operator)
