@@ -20,5 +20,8 @@ func main() {
 		fmt.Println("Erro ao decodificar o JSON:", err)
 		return
 	}
-	interpreter.Eval(file.Expression)
+
+	interpreter := interpreter.NewInterpreter(file)
+
+	interpreter.Eval(interpreter.Node.Expression)
 }

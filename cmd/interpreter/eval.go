@@ -5,10 +5,54 @@ import (
 	"strings"
 )
 
-func Eval(node Expression) interface{} {
+type Interpreter struct {
+	Node   File
+	Global *Environment
+	env    *Environment
+}
+
+func NewInterpreter(file File) *Interpreter {
+	global := &Environment{values: make(Scope)}
+	return &Interpreter{
+		Node:   file,
+		Global: global,
+		env:    global,
+	}
+}
+
+type Environment struct {
+	values Scope
+}
+
+type Scope map[string]interface{}
+
+// TODO: Tail Call Optimization
+func (i *Interpreter) Eval(node Expression) interface{} {
 	switch node.Kind {
+	case "Let":
+		nameNode := node.Let.Name.Text
+		newEnv := &Environment{values: make(Scope)}
+		newEnv.values[nameNode] = i.evaluateLet(node.Value.(map[string]interface{}))
+
+		// Update the current environment to the new environment
+		previousEnv := i.env
+		i.env = newEnv
+
+		// Evaluate the next expression in the new environment
+		defer func() {
+			// Restore the previous environment after evaluating the block
+			i.env = previousEnv
+		}()
+		kind, _ := node.Next.(map[string]interface{})["kind"].(string)
+		return i.Eval(Expression{
+			Kind:     kind,
+			Value:    node.Next.(map[string]interface{})["value"],
+			Location: parseLocation(node.Next.(map[string]interface{})["location"].(map[string]interface{})),
+		})
+	case "Var":
+		return i.env.evaluateVar(node.Value.(map[string]interface{}))
 	case "If":
-		return evalueteIf(node.Value.(map[string]interface{}))
+		return i.evaluateIf(node.Value.(map[string]interface{}))
 	case "Int":
 		return node.Value.(float64)
 	case "Str":
@@ -16,15 +60,17 @@ func Eval(node Expression) interface{} {
 	case "Bool":
 		return node.Value.(bool)
 	case "Binary":
-		return evaluateBinary(node.Value.(map[string]interface{}))
+		return i.evaluateBinary(node.Value.(map[string]interface{}))
 	case "Print":
 		kind := node.Value.(map[string]interface{})["kind"]
 		var printValue interface{}
 		switch kind {
 		case "Binary":
-			printValue = evaluateBinary(node.Value.(map[string]interface{}))
+			printValue = i.evaluateBinary(node.Value.(map[string]interface{}))
 		case "If":
-			printValue = evalueteIf(node.Value.(map[string]interface{}))
+			printValue = i.evaluateIf(node.Value.(map[string]interface{}))
+		case "Var":
+			printValue = i.env.evaluateVar(node.Value.(map[string]interface{}))
 		default:
 			printValue = node.Value.(map[string]interface{})["value"]
 		}
@@ -36,7 +82,20 @@ func Eval(node Expression) interface{} {
 	}
 }
 
-func evalueteIf(ifNode map[string]interface{}) interface{} {
+func (e *Environment) evaluateVar(varNode map[string]interface{}) interface{} {
+	text, textExists := varNode["text"].(string)
+	if !textExists {
+		panic("Invalid var expression")
+	}
+	return e.values[text]
+}
+
+func (i *Interpreter) evaluateLet(letNode map[string]interface{}) interface{} {
+	val := letNode["value"]
+	return val
+}
+
+func (i *Interpreter) evaluateIf(ifNode map[string]interface{}) interface{} {
 	condition, conditionExists := ifNode["condition"]
 	then, theExistis := ifNode["then"]
 	otherwise, otherwiseExists := ifNode["otherwise"]
@@ -44,19 +103,19 @@ func evalueteIf(ifNode map[string]interface{}) interface{} {
 	if !conditionExists || !theExistis || !otherwiseExists {
 		panic("Invalid if expression structure")
 	}
-	switch val := Eval(Expression{
+	switch val := i.Eval(Expression{
 		Kind:     condition.(map[string]interface{})["kind"].(string),
 		Value:    condition.(map[string]interface{})["value"],
 		Location: parseLocation(condition.(map[string]interface{})["location"].(map[string]interface{})),
 	}); val {
 	case true:
-		return Eval(Expression{
+		return i.Eval(Expression{
 			Kind:     then.(map[string]interface{})["kind"].(string),
 			Value:    then.(map[string]interface{})["value"],
 			Location: parseLocation(then.(map[string]interface{})["location"].(map[string]interface{})),
 		})
 	case false:
-		return Eval(Expression{
+		return i.Eval(Expression{
 			Kind:     otherwise.(map[string]interface{})["kind"].(string),
 			Value:    otherwise.(map[string]interface{})["value"],
 			Location: parseLocation(otherwise.(map[string]interface{})["location"].(map[string]interface{})),
@@ -66,7 +125,7 @@ func evalueteIf(ifNode map[string]interface{}) interface{} {
 	}
 }
 
-func evaluateBinary(binaryNode map[string]interface{}) interface{} {
+func (i *Interpreter) evaluateBinary(binaryNode map[string]interface{}) interface{} {
 	lhsExpr, lhsExists := binaryNode["lhs"]
 	rhsExpr, rhsExists := binaryNode["rhs"]
 	op, opExists := binaryNode["op"]
@@ -78,9 +137,9 @@ func evaluateBinary(binaryNode map[string]interface{}) interface{} {
 	var lhs interface{}
 	switch lkind {
 	case "Binary":
-		lhs = evaluateBinary(lhsExpr.(map[string]interface{}))
+		lhs = i.evaluateBinary(lhsExpr.(map[string]interface{}))
 	default:
-		lhs = Eval(Expression{
+		lhs = i.Eval(Expression{
 			Kind:     lhsExpr.(map[string]interface{})["kind"].(string),
 			Value:    lhsExpr.(map[string]interface{})["value"],
 			Location: parseLocation(lhsExpr.(map[string]interface{})["location"].(map[string]interface{})),
@@ -91,9 +150,9 @@ func evaluateBinary(binaryNode map[string]interface{}) interface{} {
 	var rhs interface{}
 	switch rkind {
 	case "Binary":
-		rhs = evaluateBinary(rhsExpr.(map[string]interface{}))
+		rhs = i.evaluateBinary(rhsExpr.(map[string]interface{}))
 	default:
-		rhs = Eval(Expression{
+		rhs = i.Eval(Expression{
 			Kind:     rhsExpr.(map[string]interface{})["kind"].(string),
 			Value:    rhsExpr.(map[string]interface{})["value"],
 			Location: parseLocation(rhsExpr.(map[string]interface{})["location"].(map[string]interface{})),
@@ -101,7 +160,6 @@ func evaluateBinary(binaryNode map[string]interface{}) interface{} {
 	}
 
 	operator := op.(string)
-	// Equality on string operations
 	switch operator {
 	case "Add":
 		switch lhs.(type) {

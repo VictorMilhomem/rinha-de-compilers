@@ -8,8 +8,19 @@ type File struct {
 
 type Expression struct {
 	Kind     string      `json:"kind"`
+	Let      Let         `json:"name"`
+	Next     interface{} `json:"next"`
 	Value    interface{} `json:"value"`
 	Location Location    `json:"location"`
+}
+
+type Let struct {
+	Name Parameter `json:"name"`
+}
+
+type Parameter struct {
+	Text     string   `json:"text"`
+	Location Location `json:"location"`
 }
 
 type Location struct {
