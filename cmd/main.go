@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	data, err := ioutil.ReadFile("examples\\if.json")
+	data, err := ioutil.ReadFile("examples\\let.json")
 	if err != nil {
 		fmt.Println("Erro ao ler o arquivo:", err)
 		return
@@ -22,6 +22,5 @@ func main() {
 	}
 
 	interpreter := interpreter.NewInterpreter(file)
-
-	interpreter.Eval(interpreter.Node.Expression)
+	interpreter.Run()
 }
