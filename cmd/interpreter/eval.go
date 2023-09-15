@@ -79,6 +79,10 @@ func Eval(node Expression, env *Environment) interface{} {
 		return node.Value.(bool)
 	case "Binary":
 		return evaluateBinary(node.Value.(map[string]interface{}), env)
+	case "First":
+		return getTupleFirstOrSecond(node.Value.(map[string]interface{}), env).(Tuple).first
+	case "Second":
+		return getTupleFirstOrSecond(node.Value.(map[string]interface{}), env).(Tuple).second
 	case "Print":
 		kind := node.Value.(map[string]interface{})["kind"]
 		var printValue interface{}
@@ -101,6 +105,20 @@ func Eval(node Expression, env *Environment) interface{} {
 		return nil
 	default:
 		panic("Unsupported expression kind: " + node.Kind)
+	}
+}
+
+func getTupleFirstOrSecond(node map[string]interface{}, env *Environment) interface{} {
+	kind := node["kind"].(string)
+	switch kind {
+	case "Var":
+		return evaluateVar(node, env)
+	default:
+		return Eval(Expression{
+			Kind:     kind,
+			Value:    node["value"],
+			Location: parseLocation(node["location"].(map[string]interface{})),
+		}, env)
 	}
 }
 

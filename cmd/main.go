@@ -11,7 +11,7 @@ import (
 var env = interpreter.NewEnvironment()
 
 func main() {
-	data, err := ioutil.ReadFile("examples\\tuple2.json")
+	data, err := ioutil.ReadFile("examples\\first_second.json")
 	if err != nil {
 		fmt.Println("Erro ao ler o arquivo:", err)
 		return
