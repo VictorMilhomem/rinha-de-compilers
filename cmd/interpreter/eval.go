@@ -5,52 +5,38 @@ import (
 	"strings"
 )
 
-type Interpreter struct {
-	Node File
-}
-
-func NewInterpreter(file File) *Interpreter {
-	return &Interpreter{
-		Node: file,
-	}
-}
-
-func (i *Interpreter) Run() {
-	env := NewEnvironment()
-	Eval(i.Node.Expression, env)
-}
-
 type Environment struct {
-	values Scope
+	Values map[string]interface{}
 }
 
 func NewEnvironment() *Environment {
-	return &Environment{make(Scope)}
+	return &Environment{Values: make(map[string]interface{}, 100)}
 }
 
 func (e *Environment) Get(name string) (interface{}, bool) {
-	val, ok := e.values[name]
+	val, ok := e.Values[name]
 	return val, ok
 }
 
 func (e *Environment) Set(name string, val interface{}) interface{} {
-	e.values[name] = val
+	e.Values[name] = val
 	return val
 }
-
-type Scope map[string]interface{}
 
 // TODO: Tail Call Optimization
 func Eval(node Expression, env *Environment) interface{} {
 	switch node.Kind {
 	case "Let":
-		nameNode := node.Let.Name.Text
-		val := node.Value.(map[string]interface{})["values"]
+		nameNode := node.Let.(map[string]interface{})["text"].(string)
+		val := Eval(Expression{
+			Kind:     node.Value.(map[string]interface{})["kind"].(string),
+			Value:    node.Value.(map[string]interface{})["value"],
+			Location: parseLocation(node.Value.(map[string]interface{})["location"].(map[string]interface{})),
+		}, env)
 		env.Set(nameNode, val)
 
-		kind, _ := node.Next.(map[string]interface{})["kind"].(string)
 		return Eval(Expression{
-			Kind:     kind,
+			Kind:     node.Next.(map[string]interface{})["kind"].(string),
 			Value:    node.Next.(map[string]interface{})["value"],
 			Location: parseLocation(node.Next.(map[string]interface{})["location"].(map[string]interface{})),
 		}, env)
@@ -81,9 +67,9 @@ func Eval(node Expression, env *Environment) interface{} {
 			printValue = evaluateIf(node.Value.(map[string]interface{}), env)
 		case "Var":
 			text := node.Value.(map[string]interface{})["text"].(string)
+
 			val, ok := env.Get(text)
 			if !ok {
-				fmt.Println(env.Get(text))
 				panic("could not get env value")
 			}
 

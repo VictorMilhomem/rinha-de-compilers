@@ -8,6 +8,8 @@ import (
 	"github.com/VictorMilhomem/rinha-de-compilers/cmd/interpreter"
 )
 
+var env = interpreter.NewEnvironment()
+
 func main() {
 	data, err := ioutil.ReadFile("examples\\let.json")
 	if err != nil {
@@ -20,7 +22,5 @@ func main() {
 		fmt.Println("Erro ao decodificar o JSON:", err)
 		return
 	}
-
-	interpreter := interpreter.NewInterpreter(file)
-	interpreter.Run()
+	interpreter.Eval(file.Expression, env)
 }

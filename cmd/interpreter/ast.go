@@ -8,7 +8,7 @@ type File struct {
 
 type Expression struct {
 	Kind     string      `json:"kind"`
-	Let      Let         `json:"name"`
+	Let      interface{} `json:"name"`
 	Next     interface{} `json:"next"`
 	Value    interface{} `json:"value"`
 	Location Location    `json:"location"`
