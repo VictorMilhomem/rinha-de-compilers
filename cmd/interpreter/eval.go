@@ -29,7 +29,6 @@ func Eval(node Expression, env *Environment) interface{} {
 	case "Let":
 		nameNode := node.Let.(map[string]interface{})["text"].(string)
 		var val interface{}
-		// fmt.Println(node.Value.(map[string]interface{})["parameters"])
 		switch kind := node.Value.(map[string]interface{})["kind"].(string); kind {
 		case "Binary":
 			val = evaluateBinary(node.Value.(map[string]interface{}), env)
@@ -129,18 +128,35 @@ func evaluateCall(callNode map[string]interface{}, env *Environment) interface{}
 	closure := callNode["callee"].(map[string]interface{})
 	args := callNode["arguments"].([]interface{})
 	fn := evaluateVar(closure, env)
-	fnScope := NewEnvironment()
+	fnScope := env
 	for i, param := range fn.(Closure).params {
-		fnScope.Set(param.(map[string]interface{})["text"].(string), Eval(Expression{
-			Kind:     args[i].(map[string]interface{})["kind"].(string),
-			Value:    args[i].(map[string]interface{})["value"],
-			Location: parseLocation(args[i].(map[string]interface{})["location"].(map[string]interface{})),
-		}, env))
+		var val interface{}
+		switch kind := args[i].(map[string]interface{})["kind"].(string); kind {
+		case "Binary":
+			val = evaluateBinary(args[i].(map[string]interface{}), env)
+		case "If":
+			val = evaluateIf(args[i].(map[string]interface{}), env)
+		case "Var":
+			val = evaluateVar(args[i].(map[string]interface{}), env)
+		default:
+			val = Eval(Expression{
+				Kind:     kind,
+				Value:    args[i].(map[string]interface{})["value"],
+				Location: parseLocation(args[i].(map[string]interface{})["location"].(map[string]interface{})),
+			}, env)
+		}
+
+		fnScope.Set(param.(map[string]interface{})["text"].(string), val)
 	}
 	body := fn.(Closure).body.(map[string]interface{})
 	switch kind := body["kind"].(string); kind {
 	case "Binary":
 		return evaluateBinary(body, fnScope)
+	case "If":
+		return evaluateIf(body, fnScope)
+	case "Var":
+		return evaluateVar(body, fnScope)
+
 	default:
 		return Eval(Expression{
 			Kind:     kind,
@@ -212,27 +228,52 @@ func evaluateIf(ifNode map[string]interface{}, env *Environment) interface{} {
 	condition, conditionExists := ifNode["condition"]
 	then, theExistis := ifNode["then"]
 	otherwise, otherwiseExists := ifNode["otherwise"]
-
 	if !conditionExists || !theExistis || !otherwiseExists {
 		panic("Invalid if expression structure")
 	}
-	switch val := Eval(Expression{
-		Kind:     condition.(map[string]interface{})["kind"].(string),
-		Value:    condition.(map[string]interface{})["value"],
-		Location: parseLocation(condition.(map[string]interface{})["location"].(map[string]interface{})),
-	}, env); val {
+	var val interface{}
+
+	switch kind := condition.(map[string]interface{})["kind"].(string); kind {
+	case "Binary":
+		val = evaluateBinary(condition.(map[string]interface{}), env)
+	case "Var":
+		val = evaluateVar(condition.(map[string]interface{}), env)
+	default:
+		val = Eval(Expression{
+			Kind:     condition.(map[string]interface{})["kind"].(string),
+			Value:    condition.(map[string]interface{})["value"],
+			Location: parseLocation(condition.(map[string]interface{})["location"].(map[string]interface{})),
+		}, env)
+	}
+
+	switch val {
 	case true:
-		return Eval(Expression{
-			Kind:     then.(map[string]interface{})["kind"].(string),
-			Value:    then.(map[string]interface{})["value"],
-			Location: parseLocation(then.(map[string]interface{})["location"].(map[string]interface{})),
-		}, env)
+
+		switch kind := then.(map[string]interface{})["kind"].(string); kind {
+		case "Binary":
+			return evaluateBinary(then.(map[string]interface{}), env)
+		case "Var":
+			return evaluateVar(then.(map[string]interface{}), env)
+		default:
+			return Eval(Expression{
+				Kind:     then.(map[string]interface{})["kind"].(string),
+				Value:    then.(map[string]interface{})["value"],
+				Location: parseLocation(then.(map[string]interface{})["location"].(map[string]interface{})),
+			}, env)
+		}
 	case false:
-		return Eval(Expression{
-			Kind:     otherwise.(map[string]interface{})["kind"].(string),
-			Value:    otherwise.(map[string]interface{})["value"],
-			Location: parseLocation(otherwise.(map[string]interface{})["location"].(map[string]interface{})),
-		}, env)
+		switch kind := otherwise.(map[string]interface{})["kind"].(string); kind {
+		case "Binary":
+			return evaluateBinary(otherwise.(map[string]interface{}), env)
+		case "Var":
+			return evaluateVar(then.(map[string]interface{}), env)
+		default:
+			return Eval(Expression{
+				Kind:     otherwise.(map[string]interface{})["kind"].(string),
+				Value:    otherwise.(map[string]interface{})["value"],
+				Location: parseLocation(otherwise.(map[string]interface{})["location"].(map[string]interface{})),
+			}, env)
+		}
 	default:
 		panic("Error in if expression")
 	}
@@ -253,6 +294,8 @@ func evaluateBinary(binaryNode map[string]interface{}, env *Environment) interfa
 		lhs = evaluateBinary(lhsExpr.(map[string]interface{}), env)
 	case "Var":
 		lhs = evaluateVar(lhsExpr.(map[string]interface{}), env)
+	case "Call":
+		lhs = evaluateCall(lhsExpr.(map[string]interface{}), env)
 	default:
 		lhs = Eval(Expression{
 			Kind:     lhsExpr.(map[string]interface{})["kind"].(string),
@@ -268,6 +311,8 @@ func evaluateBinary(binaryNode map[string]interface{}, env *Environment) interfa
 		rhs = evaluateBinary(rhsExpr.(map[string]interface{}), env)
 	case "Var":
 		rhs = evaluateVar(rhsExpr.(map[string]interface{}), env)
+	case "Call":
+		rhs = evaluateCall(lhsExpr.(map[string]interface{}), env)
 	default:
 		rhs = Eval(Expression{
 			Kind:     rhsExpr.(map[string]interface{})["kind"].(string),
