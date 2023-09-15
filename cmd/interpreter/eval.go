@@ -60,7 +60,9 @@ func Eval(node Expression, env *Environment) interface{} {
 				Location: parseLocation(node.Next.(map[string]interface{})["location"].(map[string]interface{})),
 			}, env)
 		}
+	case "Tuple":
 
+		return evaluateTuple(node.Value.(map[string]interface{}), env)
 	case "Var":
 		return evaluateVar(node.Value.(map[string]interface{}), env)
 	case "Function":
@@ -95,6 +97,10 @@ func Eval(node Expression, env *Environment) interface{} {
 	default:
 		panic("Unsupported expression kind: " + node.Kind)
 	}
+}
+
+func evaluateTuple(tupleNode map[string]interface{}, env *Environment) interface{} {
+	return nil
 }
 
 func evaluateVar(varNode map[string]interface{}, env *Environment) interface{} {
