@@ -23,17 +23,20 @@ func (e *Environment) Set(name string, val interface{}) interface{} {
 	return val
 }
 
-// TODO: Tail Call Optimization
+// TODO: Tail Call Optimization and Errors
 func Eval(node Expression, env *Environment) interface{} {
 	switch node.Kind {
 	case "Let":
 		nameNode := node.Let.(map[string]interface{})["text"].(string)
 		var val interface{}
+		// fmt.Println(node.Value.(map[string]interface{})["parameters"])
 		switch kind := node.Value.(map[string]interface{})["kind"].(string); kind {
 		case "Binary":
 			val = evaluateBinary(node.Value.(map[string]interface{}), env)
 		case "Tuple":
 			val = evaluateTuple(node.Value.(map[string]interface{}), env)
+		case "Function":
+			val = closure(node.Value.(map[string]interface{}), env)
 		default:
 			val = Eval(Expression{
 				Kind:     kind,
@@ -68,7 +71,9 @@ func Eval(node Expression, env *Environment) interface{} {
 	case "Var":
 		return evaluateVar(node.Value.(map[string]interface{}), env)
 	case "Function":
-		return nil
+		return closure(node.Value.(map[string]interface{}), env)
+	case "Call":
+		return evaluateCall(node.Value.(map[string]interface{}), env)
 	case "If":
 		return evaluateIf(node.Value.(map[string]interface{}), env)
 	case "Int":
@@ -97,6 +102,8 @@ func Eval(node Expression, env *Environment) interface{} {
 			printValue = evaluateTuple(node.Value.(map[string]interface{}), env)
 			// fmt.Printf("(%v, %v)", printValue.(Tuple).first, printValue.(Tuple).second)
 			// return nil
+		case "Call":
+			printValue = evaluateCall(node.Value.(map[string]interface{}), env)
 		default:
 			printValue = node.Value.(map[string]interface{})["value"]
 		}
@@ -105,6 +112,41 @@ func Eval(node Expression, env *Environment) interface{} {
 		return nil
 	default:
 		panic("Unsupported expression kind: " + node.Kind)
+	}
+}
+
+func closure(fnNode map[string]interface{}, env *Environment) interface{} {
+	params := fnNode["parameters"].([]interface{})
+	body := fnNode["value"]
+	return Closure{
+		body:   body,
+		params: params,
+		env:    env,
+	}
+}
+
+func evaluateCall(callNode map[string]interface{}, env *Environment) interface{} {
+	closure := callNode["callee"].(map[string]interface{})
+	args := callNode["arguments"].([]interface{})
+	fn := evaluateVar(closure, env)
+	fnScope := NewEnvironment()
+	for i, param := range fn.(Closure).params {
+		fnScope.Set(param.(map[string]interface{})["text"].(string), Eval(Expression{
+			Kind:     args[i].(map[string]interface{})["kind"].(string),
+			Value:    args[i].(map[string]interface{})["value"],
+			Location: parseLocation(args[i].(map[string]interface{})["location"].(map[string]interface{})),
+		}, env))
+	}
+	body := fn.(Closure).body.(map[string]interface{})
+	switch kind := body["kind"].(string); kind {
+	case "Binary":
+		return evaluateBinary(body, fnScope)
+	default:
+		return Eval(Expression{
+			Kind:     kind,
+			Value:    body["value"],
+			Location: parseLocation(body["location"].(map[string]interface{})),
+		}, fnScope)
 	}
 }
 

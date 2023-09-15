@@ -14,6 +14,12 @@ type Expression struct {
 	Location Location    `json:"location"`
 }
 
+type Closure struct {
+	body   interface{}
+	params []interface{}
+	env    *Environment
+}
+
 type Tuple struct {
 	first, second interface{}
 }
