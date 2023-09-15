@@ -14,13 +14,8 @@ type Expression struct {
 	Location Location    `json:"location"`
 }
 
-type Let struct {
-	Name Parameter `json:"name"`
-}
-
-type Parameter struct {
-	Text     string   `json:"text"`
-	Location Location `json:"location"`
+type Tuple struct {
+	first, second interface{}
 }
 
 type Location struct {

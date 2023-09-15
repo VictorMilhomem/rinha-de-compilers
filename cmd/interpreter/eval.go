@@ -28,11 +28,12 @@ func Eval(node Expression, env *Environment) interface{} {
 	switch node.Kind {
 	case "Let":
 		nameNode := node.Let.(map[string]interface{})["text"].(string)
-
 		var val interface{}
 		switch kind := node.Value.(map[string]interface{})["kind"].(string); kind {
 		case "Binary":
 			val = evaluateBinary(node.Value.(map[string]interface{}), env)
+		case "Tuple":
+			val = evaluateTuple(node.Value.(map[string]interface{}), env)
 		default:
 			val = Eval(Expression{
 				Kind:     kind,
@@ -45,6 +46,8 @@ func Eval(node Expression, env *Environment) interface{} {
 		switch nextKind {
 		case "Binary":
 			return evaluateBinary(node.Next.(map[string]interface{}), env)
+		case "Tuple":
+			return evaluateTuple(node.Next.(map[string]interface{}), env)
 		case "Let":
 			return Eval(Expression{
 				Kind:     node.Next.(map[string]interface{})["kind"].(string),
@@ -61,7 +64,6 @@ func Eval(node Expression, env *Environment) interface{} {
 			}, env)
 		}
 	case "Tuple":
-
 		return evaluateTuple(node.Value.(map[string]interface{}), env)
 	case "Var":
 		return evaluateVar(node.Value.(map[string]interface{}), env)
@@ -86,8 +88,11 @@ func Eval(node Expression, env *Environment) interface{} {
 		case "If":
 			printValue = evaluateIf(node.Value.(map[string]interface{}), env)
 		case "Var":
-
 			printValue = evaluateVar(node.Value.(map[string]interface{}), env)
+		case "Tuple":
+			printValue = evaluateTuple(node.Value.(map[string]interface{}), env)
+			// fmt.Printf("(%v, %v)", printValue.(Tuple).first, printValue.(Tuple).second)
+			// return nil
 		default:
 			printValue = node.Value.(map[string]interface{})["value"]
 		}
@@ -100,7 +105,37 @@ func Eval(node Expression, env *Environment) interface{} {
 }
 
 func evaluateTuple(tupleNode map[string]interface{}, env *Environment) interface{} {
-	return nil
+	firstExpr := tupleNode["first"]
+	secondExpr := tupleNode["second"]
+	var first interface{}
+	switch kind := firstExpr.(map[string]interface{})["kind"].(string); kind {
+	case "Binary":
+		first = evaluateBinary(firstExpr.(map[string]interface{}), env)
+	case "Var":
+		first = evaluateVar(firstExpr.(map[string]interface{}), env)
+	default:
+		first = Eval(Expression{
+			Kind:     kind,
+			Value:    firstExpr.(map[string]interface{})["value"],
+			Location: parseLocation(firstExpr.(map[string]interface{})["location"].(map[string]interface{})),
+		}, env)
+	}
+
+	var second interface{}
+	switch kind := secondExpr.(map[string]interface{})["kind"].(string); kind {
+	case "Binary":
+		second = evaluateBinary(secondExpr.(map[string]interface{}), env)
+	case "Var":
+		second = evaluateVar(secondExpr.(map[string]interface{}), env)
+	default:
+		second = Eval(Expression{
+			Kind:     secondExpr.(map[string]interface{})["kind"].(string),
+			Value:    secondExpr.(map[string]interface{})["value"],
+			Location: parseLocation(secondExpr.(map[string]interface{})["location"].(map[string]interface{})),
+		}, env)
+	}
+
+	return Tuple{first: first, second: second}
 }
 
 func evaluateVar(varNode map[string]interface{}, env *Environment) interface{} {
