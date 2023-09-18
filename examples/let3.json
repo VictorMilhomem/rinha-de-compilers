@@ -1,0 +1,36 @@
+{
+  "name": "let3.rinha",
+  "expression": {
+    "kind": "Let",
+    "name": {
+      "text": "a",
+      "location": { "start": 4, "end": 5, "filename": "let3.rinha" }
+    },
+    "value": {
+      "kind": "Binary",
+      "lhs": {
+        "kind": "Int",
+        "value": 2,
+        "location": { "start": 8, "end": 9, "filename": "let3.rinha" }
+      },
+      "op": "Add",
+      "rhs": {
+        "kind": "Int",
+        "value": 3,
+        "location": { "start": 10, "end": 11, "filename": "let3.rinha" }
+      },
+      "location": { "start": 8, "end": 11, "filename": "let3.rinha" }
+    },
+    "next": {
+      "kind": "Print",
+      "value": {
+        "kind": "Var",
+        "text": "a",
+        "location": { "start": 20, "end": 21, "filename": "let3.rinha" }
+      },
+      "location": { "start": 14, "end": 22, "filename": "let3.rinha" }
+    },
+    "location": { "start": 0, "end": 22, "filename": "let3.rinha" }
+  },
+  "location": { "start": 0, "end": 22, "filename": "let3.rinha" }
+}

@@ -1,0 +1,33 @@
+{
+  "name": "binary.rinha",
+  "expression": {
+    "kind": "Print",
+    "value": {
+      "kind": "Binary",
+      "lhs": {
+        "kind": "Int",
+        "value": 12,
+        "location": { "start": 6, "end": 8, "filename": "binary.rinha" }
+      },
+      "op": "Add",
+      "rhs": {
+        "kind": "Binary",
+        "lhs": {
+          "kind": "Int",
+          "value": 2,
+          "location": { "start": 10, "end": 11, "filename": "binary.rinha" }
+        },
+        "op": "Mul",
+        "rhs": {
+          "kind": "Int",
+          "value": 3,
+          "location": { "start": 12, "end": 13, "filename": "binary.rinha" }
+        },
+        "location": { "start": 10, "end": 13, "filename": "binary.rinha" }
+      },
+      "location": { "start": 6, "end": 14, "filename": "binary.rinha" }
+    },
+    "location": { "start": 0, "end": 15, "filename": "binary.rinha" }
+  },
+  "location": { "start": 0, "end": 15, "filename": "binary.rinha" }
+}

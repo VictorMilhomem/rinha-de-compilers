@@ -1,0 +1,7 @@
+print(
+    if (true) {
+        "Fluminense Football Club"
+    } else {
+        1902
+    }
+)

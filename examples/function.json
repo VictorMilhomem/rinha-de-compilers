@@ -1,0 +1,66 @@
+{
+  "name": "function.rinha",
+  "expression": {
+    "kind": "Let",
+    "name": {
+      "text": "sum",
+      "location": { "start": 4, "end": 7, "filename": "function.rinha" }
+    },
+    "value": {
+      "kind": "Function",
+      "parameters": [
+        {
+          "text": "a",
+          "location": { "start": 14, "end": 15, "filename": "function.rinha" }
+        },
+        {
+          "text": "b",
+          "location": { "start": 17, "end": 18, "filename": "function.rinha" }
+        }
+      ],
+      "value": {
+        "kind": "Binary",
+        "lhs": {
+          "kind": "Var",
+          "text": "a",
+          "location": { "start": 30, "end": 31, "filename": "function.rinha" }
+        },
+        "op": "Add",
+        "rhs": {
+          "kind": "Var",
+          "text": "b",
+          "location": { "start": 34, "end": 35, "filename": "function.rinha" }
+        },
+        "location": { "start": 30, "end": 35, "filename": "function.rinha" }
+      },
+      "location": { "start": 10, "end": 38, "filename": "function.rinha" }
+    },
+    "next": {
+      "kind": "Print",
+      "value": {
+        "kind": "Call",
+        "callee": {
+          "kind": "Var",
+          "text": "sum",
+          "location": { "start": 49, "end": 52, "filename": "function.rinha" }
+        },
+        "arguments": [
+          {
+            "kind": "Int",
+            "value": 2,
+            "location": { "start": 53, "end": 54, "filename": "function.rinha" }
+          },
+          {
+            "kind": "Int",
+            "value": 3,
+            "location": { "start": 56, "end": 57, "filename": "function.rinha" }
+          }
+        ],
+        "location": { "start": 49, "end": 58, "filename": "function.rinha" }
+      },
+      "location": { "start": 43, "end": 59, "filename": "function.rinha" }
+    },
+    "location": { "start": 0, "end": 59, "filename": "function.rinha" }
+  },
+  "location": { "start": 0, "end": 59, "filename": "function.rinha" }
+}

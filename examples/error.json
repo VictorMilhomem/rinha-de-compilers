@@ -1,0 +1,43 @@
+{
+  "name": "error.rinha",
+  "expression": {
+    "kind": "Let",
+    "name": {
+      "text": "a",
+      "location": { "start": 4, "end": 5, "filename": "error.rinha" }
+    },
+    "value": {
+      "kind": "Int",
+      "value": 3,
+      "location": { "start": 8, "end": 9, "filename": "error.rinha" }
+    },
+    "next": {
+      "kind": "Let",
+      "name": {
+        "text": "b",
+        "location": { "start": 16, "end": 17, "filename": "error.rinha" }
+      },
+      "value": {
+        "kind": "Second",
+        "value": {
+          "kind": "Var",
+          "text": "a",
+          "location": { "start": 27, "end": 28, "filename": "error.rinha" }
+        },
+        "location": { "start": 20, "end": 29, "filename": "error.rinha" }
+      },
+      "next": {
+        "kind": "Print",
+        "value": {
+          "kind": "Var",
+          "text": "a",
+          "location": { "start": 38, "end": 39, "filename": "error.rinha" }
+        },
+        "location": { "start": 32, "end": 40, "filename": "error.rinha" }
+      },
+      "location": { "start": 12, "end": 40, "filename": "error.rinha" }
+    },
+    "location": { "start": 0, "end": 40, "filename": "error.rinha" }
+  },
+  "location": { "start": 0, "end": 40, "filename": "error.rinha" }
+}

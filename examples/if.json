@@ -1,0 +1,27 @@
+{
+  "name": "if.rinha",
+  "expression": {
+    "kind": "Print",
+    "value": {
+      "kind": "If",
+      "condition": {
+        "kind": "Bool",
+        "value": true,
+        "location": { "start": 16, "end": 20, "filename": "if.rinha" }
+      },
+      "then": {
+        "kind": "Str",
+        "value": "Fluminense Football Club",
+        "location": { "start": 33, "end": 59, "filename": "if.rinha" }
+      },
+      "otherwise": {
+        "kind": "Int",
+        "value": 1902,
+        "location": { "start": 83, "end": 87, "filename": "if.rinha" }
+      },
+      "location": { "start": 12, "end": 94, "filename": "if.rinha" }
+    },
+    "location": { "start": 0, "end": 97, "filename": "if.rinha" }
+  },
+  "location": { "start": 0, "end": 97, "filename": "if.rinha" }
+}

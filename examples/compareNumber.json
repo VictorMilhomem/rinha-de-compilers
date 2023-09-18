@@ -1,0 +1,45 @@
+{
+  "name": "compareNumber.rinha",
+  "expression": {
+    "kind": "Print",
+    "value": {
+      "kind": "Binary",
+      "lhs": {
+        "kind": "Int",
+        "value": 2,
+        "location": { "start": 6, "end": 7, "filename": "compareNumber.rinha" }
+      },
+      "op": "Eq",
+      "rhs": {
+        "kind": "Binary",
+        "lhs": {
+          "kind": "Int",
+          "value": 1,
+          "location": {
+            "start": 11,
+            "end": 12,
+            "filename": "compareNumber.rinha"
+          }
+        },
+        "op": "Add",
+        "rhs": {
+          "kind": "Int",
+          "value": 1,
+          "location": {
+            "start": 15,
+            "end": 16,
+            "filename": "compareNumber.rinha"
+          }
+        },
+        "location": {
+          "start": 11,
+          "end": 16,
+          "filename": "compareNumber.rinha"
+        }
+      },
+      "location": { "start": 6, "end": 16, "filename": "compareNumber.rinha" }
+    },
+    "location": { "start": 0, "end": 17, "filename": "compareNumber.rinha" }
+  },
+  "location": { "start": 0, "end": 17, "filename": "compareNumber.rinha" }
+}
