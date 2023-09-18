@@ -24,7 +24,7 @@ func (e *Environment) Set(name string, val interface{}) interface{} {
 	return val
 }
 
-func (e *Environment) Copy(env *Environment) *Environment {
+func CopyEnv(env *Environment) *Environment {
 	newEnv := NewEnvironment()
 	for k, v := range env.Values {
 		newEnv.Values[k] = v
@@ -40,6 +40,10 @@ func Eval(expression interface{}, env *Environment) interface{} {
 		return node(expression, "value").(float64)
 	case "Bool":
 		return node(expression, "value").(bool)
+	case "Function":
+		return evalFunction(expression, env)
+	case "Call":
+		return evalCall(expression, env)
 	case "Tuple":
 		return evalTuple(expression, env)
 	case "First", "Second":
@@ -54,7 +58,13 @@ func Eval(expression interface{}, env *Environment) interface{} {
 		return evalIf(expression, env)
 	case "Print":
 		val := Eval(node(expression, "value"), env)
+		if val, ok := val.(Tuple); ok {
+			val.printTuple(0)
+			return nil
+		}
+
 		fmt.Printf("%v", val)
+
 	}
 	return nil
 }
@@ -84,6 +94,33 @@ func CompareStr(lhs, rhs string) bool {
 	default:
 		return false
 	}
+}
+
+func evalFunction(expression interface{}, env *Environment) interface{} {
+	params := node(expression, "parameters").([]interface{})
+	body := node(expression, "value").(map[string]interface{})
+	loc := node(expression, "location")
+	return Closure{
+		parameters: params,
+		body:       body,
+		location:   loc,
+	}
+}
+
+func evalCall(expression interface{}, env *Environment) interface{} {
+	callee := node(expression, "callee")
+	args := node(expression, "arguments").([]interface{})
+	fn := Eval(callee, env)
+
+	fnScope := CopyEnv(env)
+	for i, param := range fn.(Closure).parameters {
+		val := Eval(args[i], env)
+		fnScope.Set(node(param, "text").(string), val)
+
+	}
+
+	body := fn.(Closure).body
+	return Eval(body, fnScope)
 }
 
 func getTupleElement(expression interface{}, env *Environment, kind string) interface{} {
