@@ -11,7 +11,7 @@ import (
 var env = interpreter.NewEnvironment()
 
 func main() {
-	data, err := ioutil.ReadFile("examples\\function.json")
+	data, err := ioutil.ReadFile("examples\\comb.json")
 	if err != nil {
 		fmt.Println("Erro ao ler o arquivo:", err)
 		return
@@ -22,6 +22,6 @@ func main() {
 		fmt.Println("Erro ao decodificar o JSON:", err)
 		return
 	}
-	// fmt.Printf("%v", file)
+
 	interpreter.Eval(file.Expression, env)
 }
