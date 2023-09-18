@@ -3,7 +3,10 @@ package interpreter
 import (
 	"fmt"
 	"math"
+	"os"
 	"strings"
+
+	"github.com/fatih/color"
 )
 
 type Environment struct {
@@ -96,6 +99,28 @@ func CompareStr(lhs, rhs string) bool {
 	}
 }
 
+func ThrowError(value interface{}, msg string, optional string) {
+	val := fmt.Sprintf("%v", value)
+	fmt.Print(msg)
+	color.Set(color.FgRed)
+	fmt.Printf("%s", val)
+	if optional != "" {
+		color.Unset()
+		fmt.Print(optional)
+	}
+	color.Set(color.FgRed)
+	fmt.Println()
+	for i := 0; i < len(msg)+len(val); i++ {
+		fmt.Print(" ")
+		if i >= len(msg) {
+			fmt.Print("|_")
+		}
+	}
+	fmt.Println("_ Here")
+	color.Unset()
+	os.Exit(64)
+}
+
 func evalFunction(expression interface{}, env *Environment) interface{} {
 	params := node(expression, "parameters").([]interface{})
 	body := node(expression, "value").(map[string]interface{})
@@ -125,14 +150,20 @@ func evalCall(expression interface{}, env *Environment) interface{} {
 
 func getTupleElement(expression interface{}, env *Environment, kind string) interface{} {
 	val := Eval(node(expression, "value"), env)
+
 	switch kind {
 	case "First":
-		return val.(Tuple).first
+		if val, ok := val.(Tuple); ok {
+			return val.first
+		}
+		ThrowError(val, "Runtime Error: value ", " it's not a tuple")
 	case "Second":
-		return val.(Tuple).second
-	default:
-		panic("could not get tuple value")
+		if val, ok := val.(Tuple); ok {
+			return val.second
+		}
+		ThrowError(val, "Runtime Error: value ", " it's not a tuple")
 	}
+	return nil
 }
 
 func evalTuple(expression interface{}, env *Environment) interface{} {

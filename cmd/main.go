@@ -11,7 +11,7 @@ import (
 var env = interpreter.NewEnvironment()
 
 func main() {
-	data, err := ioutil.ReadFile("examples\\comb.json")
+	data, err := ioutil.ReadFile("examples\\error.json")
 	if err != nil {
 		fmt.Println("Erro ao ler o arquivo:", err)
 		return
