@@ -40,6 +40,14 @@ func Eval(expression interface{}, env *Environment) interface{} {
 		return node(expression, "value").(float64)
 	case "Bool":
 		return node(expression, "value").(bool)
+	case "Tuple":
+		return evalTuple(expression, env)
+	case "First", "Second":
+		return getTupleElement(expression, env, kind.(string))
+	case "Let":
+		return evalLet(expression, env)
+	case "Var":
+		return evalVar(expression, env)
 	case "Binary":
 		return evalBinary(expression, env)
 	case "If":
@@ -76,6 +84,44 @@ func CompareStr(lhs, rhs string) bool {
 	default:
 		return false
 	}
+}
+
+func getTupleElement(expression interface{}, env *Environment, kind string) interface{} {
+	val := Eval(node(expression, "value"), env)
+	switch kind {
+	case "First":
+		return val.(Tuple).first
+	case "Second":
+		return val.(Tuple).second
+	default:
+		panic("could not get tuple value")
+	}
+}
+
+func evalTuple(expression interface{}, env *Environment) interface{} {
+	first := Eval(node(expression, "first"), env)
+	second := Eval(node(expression, "second"), env)
+	return Tuple{first: first, second: second}
+}
+
+func evalVar(expression interface{}, env *Environment) interface{} {
+	text := node(expression, "text")
+	val, ok := env.Get(text.(string))
+	if !ok {
+		panic("could not get variable")
+	}
+
+	return val
+}
+
+func evalLet(expression interface{}, env *Environment) interface{} {
+	nameNode := node(expression, "name")
+	text := node(nameNode, "text")
+
+	val := Eval(node(expression, "value"), env)
+
+	env.Set(text.(string), val)
+	return Eval(node(expression, "next"), env)
 }
 
 func evalIf(expression interface{}, env *Environment) interface{} {
