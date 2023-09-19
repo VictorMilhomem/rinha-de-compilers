@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io/ioutil"
 
@@ -11,7 +12,15 @@ import (
 var env = interpreter.NewEnvironment()
 
 func main() {
-	data, err := ioutil.ReadFile("examples\\error.json")
+	jsonFilePath := flag.String("json", "", "Path to the JSON file")
+	flag.Parse()
+
+	if *jsonFilePath == "" {
+		fmt.Println("Usage: programName -json <jsonFilePath>")
+		return
+	}
+
+	data, err := ioutil.ReadFile(*jsonFilePath)
 	if err != nil {
 		fmt.Println("Erro ao ler o arquivo:", err)
 		return
